@@ -1,0 +1,48 @@
+name: Flutter CI
+
+# Trigger this workflow on every push or pull request to the main branch
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    # Use a Linux virtual machine hosted by GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Download your repository code into the virtual machine
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Java (required for Android building tools)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Set up the Flutter environment
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable' # Uses the latest stable Flutter release
+          # flutter-version: '3.19.0' # Optional: lock it to your exact version
+
+      # 4. Download project dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Check code for formatting and syntax errors
+      - name: Analyze code
+        run: flutter analyze
+
+      # 6. Run your unit and widget tests
+      - name: Run tests
+        run: flutter test
+
+      # 7. Build the Android app bundle
+      - name: Build APK
+        run: flutter build apk --debug
